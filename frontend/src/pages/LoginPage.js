@@ -7,6 +7,7 @@ export default function LoginPage() {
   const [role, setRole] = useState('champion');
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -51,8 +52,15 @@ export default function LoginPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {roles.map(r => (
                 <div key={r.key} onClick={() => setRole(r.key)}
-                  style={{ padding: '10px 8px', borderRadius: 8, border: `2px solid ${role === r.key ? 'var(--primary)' : 'var(--gray-200)'}`,
-                    background: role === r.key ? 'var(--accent-light)' : 'white', cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s' }}>
+                  style={{
+                    padding: '10px 8px',
+                    borderRadius: 8,
+                    border: `2px solid ${role === r.key ? 'var(--primary)' : 'var(--gray-200)'}`,
+                    background: role === r.key ? 'var(--accent-light)' : 'white',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s'
+                  }}>
                   <div style={{ fontSize: 20 }}>{r.icon}</div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: role === r.key ? 'var(--primary)' : 'var(--gray-700)', marginTop: 2 }}>{r.label}</div>
                 </div>
@@ -63,15 +71,58 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label className="form-label">Employee ID</label>
-              <input className="form-input" placeholder="e.g. MIT2024001" value={employeeId}
-                onChange={e => setEmployeeId(e.target.value)} required />
+              <input
+                className="form-input"
+                placeholder="e.g. MIT2024001"
+                value={employeeId}
+                onChange={e => setEmployeeId(e.target.value)}
+                required
+              />
             </div>
+
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="Enter password" value={password}
-                onChange={e => setPassword(e.target.value)} required />
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="form-input"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  style={{ paddingRight: 44 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 18,
+                    color: 'var(--gray-500)',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
-            <button className="btn btn-primary btn-lg" type="submit" disabled={loading} style={{ width: '100%', marginTop: 8 }}>
+
+            <button
+              className="btn btn-primary btn-lg"
+              type="submit"
+              disabled={loading}
+              style={{ width: '100%', marginTop: 8 }}
+            >
               {loading ? <><span className="spinner" />Signing in...</> : 'Sign In'}
             </button>
           </form>
