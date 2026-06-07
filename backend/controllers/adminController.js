@@ -33,17 +33,18 @@ exports.assignRole = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'Faculty not found' });
 
+    // Hash password manually here
+    const hashed = await bcrypt.hash(password, 12);
+
     user.role = role;
-    user.password = password; // will be hashed by pre-save hook
+    user.password = hashed;
     user.isRegistered = true;
 
     if (contextId) {
-      // Check if already assigned
       const alreadyAssigned = user.assignedSubjects.find(s => s.contextId.toString() === contextId);
       if (!alreadyAssigned) {
         user.assignedSubjects.push({ contextId, role });
       }
-      // Update context
       const context = await AcademicContext.findById(contextId);
       if (context) {
         if (role === 'champion') context.champion = userId;
@@ -52,8 +53,8 @@ exports.assignRole = async (req, res) => {
       }
     }
 
-    await user.save();
-    res.json({ message: 'Faculty role assigned successfully', user: { ...user.toObject(), password: undefined } });
+    await user.save({ validateBeforeSave: false });
+    res.json({ message: 'Faculty role assigned successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -76,7 +77,7 @@ exports.addSubjectToFaculty = async (req, res) => {
       await context.save();
     }
 
-    await user.save();
+    await user.save({ validateBeforeSave: false });
     res.json({ message: 'Subject assigned' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -152,8 +153,10 @@ exports.resetPassword = async (req, res) => {
     const { userId, newPassword } = req.body;
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    user.password = newPassword;
-    await user.save();
+    // Hash manually
+    const hashed = await bcrypt.hash(newPassword, 12);
+    user.password = hashed;
+    await user.save({ validateBeforeSave: false });
     res.json({ message: 'Password reset successful' });
   } catch (err) {
     res.status(500).json({ message: err.message });
